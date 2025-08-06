@@ -1,0 +1,12 @@
+diff --git a/meson.build b/meson.build
+index 0d363f2..1fb0113 100644
+--- a/meson.build
++++ b/meson.build
+@@ -125,7 +125,6 @@ python3_test_modules = {
+     'dbus': true,
+     'dbusmock': true,
+     'gi': true,
+-    'pypamtest': get_option('pam'),
+ }
+ python3_available_modules = []
+ 

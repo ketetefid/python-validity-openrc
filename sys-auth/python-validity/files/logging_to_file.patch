@@ -1,0 +1,15 @@
+diff --git a/dbus_service/dbus-service b/dbus_service/dbus-service
+index 1c63e8d..71404cd 100755
+--- a/dbus_service/dbus-service
++++ b/dbus_service/dbus-service
+@@ -234,7 +234,9 @@ def main():
+     else:
+         level = logging.INFO
+ 
+-    handler = logging.handlers.SysLogHandler(address='/dev/log')
++    # handler = logging.handlers.SysLogHandler(address='/dev/log')
++    # we directly log to a file instead for better checking
++    handler = logging.FileHandler('/var/log/validity_boot.log', mode='w')
+     logging.basicConfig(level=level, handlers=[handler])
+ 
+     # Load and perform basic validation of config file.

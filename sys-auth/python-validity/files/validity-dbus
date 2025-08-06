@@ -1,0 +1,46 @@
+#!/sbin/openrc-run
+depend() {
+  need dbus localmount
+  use logger
+}
+
+# PID & log files
+PIDFILE=/var/run/validity.pid
+LOGFILE=/var/log/validity.log
+TMP_LOGFILE=/var/log/validity_boot.log
+
+# executable path
+EXEC=/usr/lib/python-validity/dbus-service
+
+start() {
+	ebegin "Starting validity daemon"
+	# emptying the boot logfile
+	echo "" > ${TMP_LOGFILE}
+	
+	start-stop-daemon --start --background \
+	--make-pidfile --pidfile ${PIDFILE} \
+  	--exec ${EXEC} -- --debug
+
+	# While OpenRC will mark the service as started,
+	# we need to wait for the sensor to initialize
+	# properly by checking the boot log
+	for i in $(seq 1 50); do
+	    if tail -n 100 ${TMP_LOGFILE} | grep -q 'atexit registered'; then
+		break
+	    fi
+	    sleep 0.1
+	done
+	res=$(echo "scale=1; $i / 10" | bc)
+        logger "validity-dbus: initializing took $res seconds."
+
+	eend $?
+}
+
+stop() {
+        ebegin "Stopping validity daemon"
+	# appending this boot log to the main log file
+	cat ${TMP_LOGFILE} >> ${LOGFILE}
+        start-stop-daemon --stop --pidfile ${PIDFILE}
+
+	eend $? "Failed to stop validity daemon"
+}
